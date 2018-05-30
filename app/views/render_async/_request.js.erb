@@ -1,6 +1,13 @@
+(function() {
+  this.App || (this.App = {});
+  this.App.render_async={};
+}).call(this);
+
+
 if (window.jQuery) {
   (function($) {
-    $(document).ready(function() {
+
+    App.render_async.load=function(){
       $.ajax({ url: "<%= path.html_safe %>" }).always(function(response) {
         $("#<%= container_id %>").replaceWith(response);
 
@@ -8,7 +15,12 @@ if (window.jQuery) {
           document.dispatchEvent(new Event("<%= event_name %>"));
         <% end %>
       });
+    }
+
+    $(document).ready(function() {
+        App.render_async.load();
     });
+
   }(jQuery));
 } else {
   (function() {
@@ -20,7 +32,7 @@ if (window.jQuery) {
 
       request.open("GET", "<%= path.html_safe %>", asyncRequest);
 
-      request.onload = function() {
+      App.render_async.load=function(){
         if (request.status >= SUCCESS && request.status < ERROR) {
           var container = document.getElementById("<%= container_id %>");
           container.outerHTML = request.response;
@@ -29,6 +41,10 @@ if (window.jQuery) {
             document.dispatchEvent(new Event("<%= event_name %>"));
           <% end %>
         }
+      }
+
+      request.onload = function() {
+        App.render_async.load();
       };
 
       request.send();
